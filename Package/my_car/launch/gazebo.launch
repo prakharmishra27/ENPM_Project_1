@@ -1,0 +1,23 @@
+<launch>
+  <param name="robot_description" command="$(find xacro)/xacro $(find my_car)/urdf/my_car.xacro" />
+  
+  <node args="-param robot_description -urdf -x 0 -y 0 -z 0.1 -Y 3.14 -model my_car" name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find my_car)/worlds/competition_arena.world"/> 
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+<node name="robot_state_publisher" output="screen" pkg="robot_state_publisher" respawn="false" type="robot_state_publisher"/>
+<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /> 
+
+<rosparam file="$(find my_car)/config/my_car.yaml" command="load"/>
+
+<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" ns="/" args="front_left_steering_controller front_right_steering_controller rear_wheels_controller joint_state_controller"/>
+
+</launch>
